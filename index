@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CabCall</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4361ee">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#1a1a2e;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+
+/* ── SCREENS ── */
+.scr{display:none;position:fixed;inset:0;flex-direction:column;align-items:center;background:#f0f4ff}
+.scr.on{display:flex}
+
+/* ── HEADER ── */
+.hdr{width:100%;background:#4361ee;padding:12px 20px;display:flex;align-items:center;flex-shrink:0;gap:10px}
+.logo{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.logo em{color:#ffd60a;font-style:normal}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.clk{background:rgba(255,255,255,.18);border-radius:20px;padding:4px 12px;font-size:13px;color:#fff;font-weight:500}
+
+/* ── WELCOME ── */
+#sw{background:linear-gradient(160deg,#4361ee 0%,#7209b7 100%);justify-content:center;gap:14px}
+.w-ico{width:100px;height:100px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:50px;animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.w-title{font-size:38px;font-weight:900;color:#fff;letter-spacing:-1px}
+.w-title em{color:#ffd60a;font-style:normal}
+.w-sub{font-size:15px;color:rgba(255,255,255,.75)}
+.btn-start{margin-top:14px;background:#ffd60a;color:#1a1a2e;border:none;border-radius:50px;padding:16px 48px;font-size:18px;font-weight:700;cursor:pointer}
+.btn-start:active{opacity:.88;transform:scale(.97)}
+.school-tag{position:absolute;bottom:24px;font-size:13px;color:rgba(255,255,255,.4)}
+
+/* ── LOGIN ── */
+#sl{justify-content:flex-start}
+.login-body{flex:1;display:flex;align-items:center;justify-content:center;gap:32px;width:100%;padding:20px 32px}
+.login-l{flex:1;display:flex;flex-direction:column;gap:18px;max-width:300px}
+.f-label{font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.f-disp{background:#fff;border:2px solid #4361ee;border-radius:14px;padding:14px 18px;font-size:26px;font-weight:700;color:#1a1a2e;letter-spacing:4px;min-height:60px;display:flex;align-items:center}
+.f-disp.pin{letter-spacing:12px}
+.cur{animation:blink 1s step-end infinite;color:#4361ee}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.f-hint{font-size:12px;color:#bbb;margin-top:4px}
+.step-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#999;margin-top:4px}
+.sdot{width:8px;height:8px;border-radius:50%;background:#dde3f8;transition:background .2s}
+.sdot.done{background:#4361ee}
+.sdot.act{background:#ffd60a;width:10px;height:10px}
+.login-r{display:flex;justify-content:flex-end}
+.numpad{display:grid;grid-template-columns:repeat(3,76px);gap:10px}
+.nb{width:76px;height:68px;background:#fff;border:1.5px solid #dde3f8;border-radius:14px;font-size:22px;font-weight:600;color:#1a1a2e;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:background .1s,transform .1s}
+.nb sub{font-size:9px;font-weight:400;color:#bbb;letter-spacing:1px}
+.nb:active{background:#e8edff;transform:scale(.94)}
+.nb.del{font-size:18px;color:#e63946}
+.nb.ok{grid-column:span 2;background:#4361ee;color:#fff;border-color:#4361ee;font-size:15px;font-weight:700;width:100%}
+.nb.ok:active{background:#2d4bc9}
+.nb.ok:disabled{background:#c0c8ef;border-color:#c0c8ef;cursor:default}
+
+/* ── HOME ── */
+#sh{justify-content:flex-start}
+.home-body{flex:1;width:100%;padding:16px 24px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.stu-banner{background:#fff;border-radius:16px;padding:14px 18px;display:flex;align-items:center;gap:14px;border:1.5px solid #dde3f8}
+.av{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#4361ee,#7209b7);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0}
+.stu-name{font-size:16px;font-weight:700;color:#1a1a2e}
+.stu-meta{font-size:12px;color:#999}
+.grade-badge{margin-left:auto;background:#e8edff;color:#4361ee;border-radius:20px;padding:4px 14px;font-size:13px;font-weight:600}
+.sec-title{font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.cc{background:#fff;border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;border:2px solid #dde3f8;cursor:pointer;transition:border-color .15s,transform .12s}
+.cc:active{transform:scale(.97);border-color:#4361ee}
+.cc-av{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px}
+.cc-tipo{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px}
+.cc-name{font-size:14px;font-weight:700;color:#1a1a2e;text-align:center}
+.cc-phone{font-size:11px;color:#bbb}
+
+/* ── CALL TYPE ── */
+#sct{justify-content:flex-start}
+.ct-body{flex:1;width:100%;padding:18px 24px;display:flex;flex-direction:column;gap:18px}
+.sel-banner{background:#fff;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;border:1.5px solid #dde3f8}
+.ct-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ctb{background:#fff;border-radius:20px;padding:22px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;border:2px solid #dde3f8;cursor:pointer;transition:border-color .15s,transform .12s}
+.ctb:active{transform:scale(.96)}
+.ctb.v1{border-color:#4361ee}
+.ctb.v2{border-color:#7209b7}
+.ctb.v3{border-color:#f77f00}
+.ct-ico{font-size:46px}
+.ct-lbl{font-size:14px;font-weight:700;color:#1a1a2e;text-align:center}
+.ct-sub{font-size:11px;color:#aaa;text-align:center}
+
+/* ── VOICE CALL ── */
+#svc{background:linear-gradient(160deg,#0d1b2a 0%,#1b3a5c 100%);justify-content:flex-start}
+#svc .hdr{background:rgba(255,255,255,.07)}
+.vc-body{flex:1;width:100%;display:flex;align-items:center;justify-content:center;gap:56px;padding:24px 36px}
+.av-wrap{position:relative;width:130px;height:130px;display:flex;align-items:center;justify-content:center}
+.ring{position:absolute;width:100%;height:100%;border-radius:50%;border:3px solid rgba(255,214,10,.2);animation:ring 1.6s ease-out infinite}
+.ring:nth-child(2){animation-delay:.55s}
+.ring:nth-child(3){animation-delay:1.1s}
+@keyframes ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.65);opacity:0}}
+.vc-av{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#ffd60a,#f77f00);display:flex;align-items:center;justify-content:center;font-size:44px;color:#1a1a2e;font-weight:800;z-index:1}
+.vc-name{font-size:22px;font-weight:700;color:#fff}
+.vc-tipo{font-size:13px;color:rgba(255,255,255,.5)}
+.vc-timer{font-size:30px;font-weight:300;color:#ffd60a;letter-spacing:3px;font-variant-numeric:tabular-nums}
+.vc-status{font-size:13px;color:rgba(255,255,255,.4)}
+.vc-ctrls{display:flex;flex-direction:column;gap:14px;align-items:center}
+.ctrl-row{display:flex;gap:12px}
+.ctrl{width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.1);border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.75);font-size:11px;gap:3px}
+.ctrl span{font-size:22px}
+.ctrl:active,.ctrl.on{background:rgba(255,255,255,.25)}
+.btn-hang{width:72px;height:72px;border-radius:50%;background:#e63946;border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center}
+.btn-hang:active{transform:scale(.92)}
+.rem-box{background:rgba(255,255,255,.07);border-radius:14px;padding:10px 16px;text-align:center;margin-top:4px}
+.rem-lbl{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px}
+.rem-val{font-size:22px;font-weight:300;color:#ffd60a;font-variant-numeric:tabular-nums}
+
+/* ── VIDEO CALL ── */
+#svv{justify-content:flex-start;background:#000}
+#svv .hdr{background:rgba(0,0,0,.75);position:absolute;z-index:10}
+#jitsi-box{width:100%;flex:1;position:relative}
+.btn-endvid{background:#e63946;color:#fff;border:none;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer}
+
+/* ── VIDEO MSG ── */
+#svm{justify-content:flex-start}
+#svm .hdr{background:#f77f00}
+.vm-body{flex:1;width:100%;display:flex;align-items:center;gap:24px;padding:14px 24px}
+.vm-l{flex:1;display:flex;flex-direction:column;gap:12px;align-items:center}
+#prev-vid{width:100%;max-width:360px;border-radius:16px;background:#000;aspect-ratio:16/9;object-fit:cover}
+.rec-row{display:flex;gap:14px;align-items:center}
+.btn-rec{width:68px;height:68px;border-radius:50%;background:#e63946;border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center}
+.btn-rec.recg{animation:rp 1s ease-in-out infinite}
+@keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,.5)}50%{box-shadow:0 0 0 14px rgba(230,57,70,0)}}
+.btn-rec:active{transform:scale(.93)}
+.rec-t{font-size:22px;font-weight:300;color:#e63946;font-variant-numeric:tabular-nums;letter-spacing:2px}
+.vm-r{flex:1;display:flex;flex-direction:column;gap:12px;max-width:260px}
+.rcpt-box{background:#fff;border-radius:14px;padding:14px 16px;border:2px solid #f77f00}
+.rcpt-lbl{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px}
+.rcpt-name{font-size:16px;font-weight:700;color:#1a1a2e}
+.rcpt-ph{font-size:12px;color:#aaa}
+.info-box{font-size:12px;color:#555;background:#fff8f0;border-radius:10px;padding:12px;border:1px solid #ffd6a5;line-height:1.5}
+.btn-send{background:#f77f00;color:#fff;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-send:disabled{opacity:.4;cursor:default}
+.btn-send:active{opacity:.85}
+.up-status{font-size:12px;color:#888;text-align:center}
+
+/* ── SUCCESS ── */
+#ss{background:linear-gradient(160deg,#0d3b2e 0%,#1a6a4a 100%);justify-content:center;gap:16px}
+.s-ico{font-size:78px;animation:pop .4s cubic-bezier(.36,.07,.19,.97)}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.12)}100%{transform:scale(1)}}
+.s-title{font-size:26px;font-weight:800;color:#fff}
+.s-sub{font-size:14px;color:rgba(255,255,255,.7);text-align:center;max-width:340px;line-height:1.6}
+.s-cdown{font-size:13px;color:rgba(255,255,255,.4)}
+.btn-new{background:#ffd60a;color:#1a1a2e;border:none;border-radius:50px;padding:14px 36px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-new:active{transform:scale(.96)}
+
+/* ── UTILS ── */
+.btn-back{position:absolute;bottom:16px;left:24px;background:none;border:1.5px solid rgba(0,0,0,.15);border-radius:20px;padding:7px 18px;font-size:13px;color:#888;cursor:pointer}
+.btn-back:active{background:#eee}
+.btn-back.lt{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.45)}
+#loading{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9999}
+#loading.show{display:flex}
+.spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:#e63946;color:#fff;padding:10px 24px;border-radius:30px;font-size:14px;font-weight:600;display:none;z-index:9999;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- ══ WELCOME ══════════════════════════════════════════════════ -->
+<div class="scr on" id="sw">
+  <div class="w-ico">📞</div>
+  <div class="w-title">Cab<em>Call</em></div>
+  <div class="w-sub">Cabina de comunicación escolar</div>
+  <button class="btn-start" onclick="go('l')">Toca para comenzar</button>
+  <div class="school-tag" id="school-tag">—</div>
+</div>
+
+<!-- ══ LOGIN ════════════════════════════════════════════════════ -->
+<div class="scr" id="sl">
+  <div class="hdr">
+    <div><div class="logo">Cab<em>Call</em></div><div class="hdr-sub">Identificación del alumno</div></div>
+    <div class="hdr-r"><div class="clk" id="c1">--:--</div></div>
+  </div>
+  <div class="login-body">
+    <div class="login-l">
+      <div>
+        <div class="f-label">RUT del alumno</div>
+        <div class="f-disp" id="d-rut"><span id="t-rut"></span><span class="cur" id="cur-rut">|</span></div>
+        <div class="f-hint">Sin puntos · Con guión · Ej: 12345678-9</div>
+      </div>
+      <div>
+        <div class="f-label">Clave (4 dígitos)</div>
+        <div class="f-disp pin" id="d-pin"><span id="t-pin"></span><span class="cur" id="cur-pin" style="display:none">|</span></div>
+        <div class="f-hint">Clave secreta asignada por el colegio</div>
+      </div>
+      <div class="step-row">
+        <div class="sdot act" id="d1"></div>
+        <span id="slabel">Paso 1: ingresa tu RUT</span>
+        <div class="sdot" id="d2"></div>
+      </div>
+    </div>
+    <div class="login-r">
+      <div class="numpad">
+        <button class="nb" onclick="kp('1')">1</button>
+        <button class="nb" onclick="kp('2')">2<sub>ABC</sub></button>
+        <button class="nb" onclick="kp('3')">3<sub>DEF</sub></button>
+        <button class="nb" onclick="kp('4')">4<sub>GHI</sub></button>
+        <button class="nb" onclick="kp('5')">5<sub>JKL</sub></button>
+        <button class="nb" onclick="kp('6')">6<sub>MNO</sub></button>
+        <button class="nb" onclick="kp('7')">7<sub>PQR</sub></button>
+        <button class="nb" onclick="kp('8')">8<sub>STU</sub></button>
+        <button class="nb" onclick="kp('9')">9<sub>WXY</sub></button>
+        <button class="nb" onclick="kp('-')" id="btn-dash">—</button>
+        <button class="nb" onclick="kp('0')">0</button>
+        <button class="nb del" onclick="kpDel()">⌫</button>
+        <button class="nb ok" id="btn-ok" onclick="kpOk()">✓ Continuar</button>
+      </div>
+    </div>
+  </div>
+  <button class="btn-back" onclick="go('w')">← Volver</button>
+</div>
+
+<!-- ══ HOME ════════════════════════════════════════════════════ -->
+<div class="scr" id="sh">
+  <div class="hdr">
+    <div><div class="logo">Cab<em>Call</em></div><div class="hdr-sub">¿A quién deseas contactar?</div></div>
+    <div class="hdr-r"><div class="clk" id="c2">--:--</div></div>
+  </div>
+  <div class="home-body">
+    <div class="stu-banner">
+      <div class="av" id="h-av">?</div>
+      <div>
+        <div class="stu-name" id="h-name">—</div>
+        <div class="stu-meta" id="h-rut">—</div>
+      </div>
+      <div class="grade-badge" id="h-grade">—</div>
+    </div>
+    <div class="sec-title">Selecciona el destinatario</div>
+    <div class="cg" id="contacts-grid"></div>
+  </div>
+  <button class="btn-back" onclick="logout()">↩ Cerrar sesión</button>
+</div>
+
+<!-- ══ CALL TYPE ════════════════════════════════════════════════ -->
+<div class="scr" id="sct">
+  <div class="hdr">
+    <div><div class="logo">Cab<em>Call</em></div><div class="hdr-sub">Tipo de comunicación</div></div>
+    <div class="hdr-r"><div class="clk" id="c3">--:--</div></div>
+  </div>
+  <div class="ct-body">
+    <div class="sel-banner">
+      <div style="font-size:28px" id="ct-em">👩</div>
+      <div>
+        <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px" id="ct-tipo">—</div>
+        <div style="font-size:16px;font-weight:700;color:#1a1a2e" id="ct-name">—</div>
+        <div style="font-size:12px;color:#bbb" id="ct-phone">—</div>
+      </div>
+    </div>
+    <div class="sec-title">¿Cómo deseas comunicarte?</div>
+    <div class="ct-grid">
+      <div class="ctb v1" onclick="startVoice()">
+        <div class="ct-ico">📞</div>
+        <div class="ct-lbl">Llamada de voz</div>
+        <div class="ct-sub">Llamada telefónica · Máx. 3 min.</div>
+      </div>
+      <div class="ctb v2" onclick="startVideo()">
+        <div class="ct-ico">📹</div>
+        <div class="ct-lbl">Videollamada</div>
+        <div class="ct-sub">En tiempo real · Jitsi Meet</div>
+      </div>
+      <div class="ctb v3" onclick="startVMsg()">
+        <div class="ct-ico">🎥</div>
+        <div class="ct-lbl">Mensaje de video</div>
+        <div class="ct-sub">Graba y envía por WhatsApp</div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-back" onclick="go('h')">← Volver</button>
+</div>
+
+<!-- ══ VOICE CALL ═══════════════════════════════════════════════ -->
+<div class="scr" id="svc">
+  <div class="hdr">
+    <div><div class="logo" style="color:#fff">Cab<em>Call</em></div><div class="hdr-sub">Llamada de voz</div></div>
+    <div class="hdr-r"><div class="clk" id="c4">--:--</div></div>
+  </div>
+  <div class="vc-body">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div class="av-wrap">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <div class="vc-av" id="vc-ini">M</div>
+      </div>
+      <div class="vc-name" id="vc-name">—</div>
+      <div class="vc-tipo" id="vc-tipo">—</div>
+      <div class="vc-timer" id="vc-t">0:00</div>
+      <div class="vc-status" id="vc-st">Llamando…</div>
+    </div>
+    <div class="vc-ctrls">
+      <div class="ctrl-row">
+        <button class="ctrl" onclick="this.classList.toggle('on')"><span>🎤</span>Silencio</button>
+        <button class="ctrl" onclick="this.classList.toggle('on')"><span>🔊</span>Altavoz</button>
+      </div>
+      <button class="btn-hang" onclick="endVoice()" title="Colgar">📵</button>
+      <div style="font-size:11px;color:rgba(255,255,255,.35)">Colgar</div>
+      <div class="rem-box">
+        <div class="rem-lbl">Tiempo restante</div>
+        <div class="rem-val" id="vc-rem">3:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIDEO CALL ═══════════════════════════════════════════════ -->
+<div class="scr" id="svv">
+  <div class="hdr">
+    <div><div class="logo" style="color:#fff">Cab<em>Call</em></div><div class="hdr-sub" id="vv-sub">Videollamada</div></div>
+    <div class="hdr-r"><button class="btn-endvid" onclick="endVideo()">✕ Terminar</button></div>
+  </div>
+  <div id="jitsi-box" style="flex:1;width:100%"></div>
+</div>
+
+<!-- ══ VIDEO MSG ════════════════════════════════════════════════ -->
+<div class="scr" id="svm">
+  <div class="hdr">
+    <div><div class="logo">Cab<em>Call</em></div><div class="hdr-sub">Mensaje de video</div></div>
+    <div class="hdr-r"><div class="clk" id="c5">--:--</div></div>
+  </div>
+  <div class="vm-body">
+    <div class="vm-l">
+      <video id="prev-vid" autoplay muted playsinline></video>
+      <div class="rec-row">
+        <button class="btn-rec" id="btn-rec" onclick="toggleRec()">🔴</button>
+        <div class="rec-t" id="rec-t" style="display:none">0:00</div>
+      </div>
+      <div style="font-size:13px;color:#888" id="rec-lbl">Toca el botón rojo para grabar</div>
+    </div>
+    <div class="vm-r">
+      <div class="rcpt-box">
+        <div class="rcpt-lbl">Enviando a</div>
+        <div class="rcpt-name" id="vm-name">—</div>
+        <div class="rcpt-ph" id="vm-phone">—</div>
+      </div>
+      <div class="info-box">📱 Tu apoderado recibirá un enlace por WhatsApp con el video grabado.</div>
+      <button class="btn-send" id="btn-send" disabled onclick="sendVMsg()">📨 Enviar mensaje</button>
+      <div class="up-status" id="up-st"></div>
+    </div>
+  </div>
+  <button class="btn-back" onclick="cancelVMsg()">← Volver</button>
+</div>
+
+<!-- ══ SUCCESS ══════════════════════════════════════════════════ -->
+<div class="scr" id="ss">
+  <div class="s-ico" id="s-ico">✅</div>
+  <div class="s-title" id="s-title">¡Listo!</div>
+  <div class="s-sub" id="s-sub">Operación completada.</div>
+  <div class="s-cdown" id="s-cdown">Cerrando sesión en 5 segundos…</div>
+  <button class="btn-new" onclick="logout()">Nueva consulta</button>
+</div>
+
+<!-- Jitsi Meet API -->
+<script src="https://meet.jit.si/external_api.js" async></script>
+
+<script>
+// ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
+const CFG = {
+  API: 'https://script.google.com/macros/s/AKfycbz-U04BZP9allu9o1Pxjqddn69FrH4NutJUqApcO1V_J_7mx_dlFmGRv3R_ZirGfYjM/exec',
+  SCHOOL: 'Colegio Marista Los Andes · Instituto Chacabuco',
+  MAX_CALL: 180,   // segundos máximos por llamada (3 min)
+  MAX_REC:  60,    // segundos máximos de grabación
+  JITSI: 'meet.jit.si',
+};
+
+// ─── ESTADO ────────────────────────────────────────────────────────────────────
+const S = {
+  step:'rut', rut:'', pin:'',
+  student:null, contacts:[], selected:null,
+  callInt:null, callSecs:0,
+  recInt:null, recSecs:0, recording:false,
+  mediaRec:null, recChunks:[], recBlob:null,
+  stream:null, jitsi:null, successInt:null,
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('school-tag').textContent = CFG.SCHOOL;
+updateClocks(); setInterval(updateClocks, 15000);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+function updateClocks() {
+  const t = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  document.querySelectorAll('.clk').forEach(el => el.textContent = t);
+}
+
+// ─── NAVEGACIÓN ───────────────────────────────────────────────────────────────
+function go(id) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  document.getElementById('s'+id).classList.add('on');
+  if (id==='l') resetLogin();
+}
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
+function resetLogin() {
+  S.step='rut'; S.rut=''; S.pin='';
+  document.getElementById('t-rut').textContent='';
+  document.getElementById('t-pin').textContent='';
+  document.getElementById('cur-rut').style.display='';
+  document.getElementById('cur-pin').style.display='none';
+  document.getElementById('d-rut').style.borderColor='#4361ee';
+  document.getElementById('d-pin').style.borderColor='#dde3f8';
+  document.getElementById('d1').className='sdot act';
+  document.getElementById('d2').className='sdot';
+  document.getElementById('slabel').textContent='Paso 1: ingresa tu RUT';
+  document.getElementById('btn-ok').textContent='✓ Continuar';
+  document.getElementById('btn-ok').disabled=false;
+  document.getElementById('btn-dash').disabled=false;
+}
+
+function kp(ch) {
+  if (S.step==='rut') {
+    if (ch==='-' && S.rut.includes('-')) return;
+    if (S.rut.length>=12) return;
+    S.rut+=ch;
+    document.getElementById('t-rut').textContent=S.rut;
+  } else {
+    if (ch==='-' || S.pin.length>=4) return;
+    S.pin+=ch;
+    document.getElementById('t-pin').textContent='•'.repeat(S.pin.length);
+  }
+}
+function kpDel() {
+  if (S.step==='rut') { S.rut=S.rut.slice(0,-1); document.getElementById('t-rut').textContent=S.rut; }
+  else { S.pin=S.pin.slice(0,-1); document.getElementById('t-pin').textContent='•'.repeat(S.pin.length); }
+}
+async function kpOk() {
+  if (S.step==='rut') {
+    if (!S.rut.includes('-') || S.rut.length < 8) { toast('Ingresa un RUT válido con guión'); return; }
+    S.step='pin';
+    document.getElementById('cur-rut').style.display='none';
+    document.getElementById('cur-pin').style.display='';
+    document.getElementById('d-rut').style.borderColor='#4caf50';
+    document.getElementById('d-pin').style.borderColor='#4361ee';
+    document.getElementById('d1').className='sdot done';
+    document.getElementById('d2').className='sdot act';
+    document.getElementById('slabel').textContent='Paso 2: ingresa tu clave de 4 dígitos';
+    document.getElementById('btn-ok').textContent='✓ Ingresar';
+    document.getElementById('btn-dash').disabled=true;
+  } else {
+    if (S.pin.length!==4) { toast('La clave debe tener exactamente 4 dígitos'); return; }
+    await doLogin();
+  }
+}
+
+async function doLogin() {
+  loading(true);
+  try {
+    const res = await fetch(`${CFG.API}?action=login&rut=${enc(S.rut)}&pin=${enc(S.pin)}`);
+    const d = await res.json();
+    if (d.ok) {
+      S.student = d.alumno;
+      await loadContacts();
+    } else {
+      toast(d.error || 'RUT o clave incorrectos. Intenta de nuevo.');
+      S.pin=''; document.getElementById('t-pin').textContent='';
+    }
+  } catch(e) { toast('Error de conexión. Verifica el Wi-Fi.'); }
+  loading(false);
+}
+
+async function loadContacts() {
+  const res = await fetch(`${CFG.API}?action=contacts&rut=${enc(S.rut)}`);
+  const d = await res.json();
+  S.contacts = d.contactos || [];
+  renderHome(); go('h');
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────────────────
+function renderHome() {
+  const st = S.student;
+  const ini = (st.nombre||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('h-av').textContent = ini;
+  document.getElementById('h-name').textContent = st.nombre;
+  document.getElementById('h-rut').textContent = 'RUT: ' + S.rut;
+  document.getElementById('h-grade').textContent = st.curso || '';
+
+  const emojis={madre:'👩',padre:'👨',familiar:'👴',apoderado:'🧑',otro:'👤'};
+  const bgs={madre:'#e8f0fe',padre:'#f3e5f5',familiar:'#fff3e0',apoderado:'#e8f5e9',otro:'#f1f1f1'};
+  const grid = document.getElementById('contacts-grid');
+  grid.innerHTML='';
+  S.contacts.forEach((c,i) => {
+    const tipo=(c.tipo||'otro').toLowerCase();
+    const card=document.createElement('div');
+    card.className='cc';
+    card.innerHTML=`<div class="cc-av" style="background:${bgs[tipo]||'#f1f1f1'}">${emojis[tipo]||'👤'}</div>
+      <div class="cc-tipo">${c.tipo}</div>
+      <div class="cc-name">${c.nombre}</div>
+      <div class="cc-phone">${c.telefono}</div>`;
+    card.onclick=()=>pickContact(i);
+    grid.appendChild(card);
+  });
+}
+
+function pickContact(i) {
+  S.selected=S.contacts[i];
+  const emojis={madre:'👩',padre:'👨',familiar:'👴',apoderado:'🧑',otro:'👤'};
+  const tipo=(S.selected.tipo||'otro').toLowerCase();
+  document.getElementById('ct-em').textContent=emojis[tipo]||'👤';
+  document.getElementById('ct-tipo').textContent=S.selected.tipo;
+  document.getElementById('ct-name').textContent=S.selected.nombre;
+  document.getElementById('ct-phone').textContent=S.selected.telefono;
+  go('ct');
+}
+
+// ─── LLAMADA DE VOZ ───────────────────────────────────────────────────────────
+function startVoice() {
+  const c=S.selected;
+  document.getElementById('vc-ini').textContent=(c.nombre[0]||'?').toUpperCase();
+  document.getElementById('vc-name').textContent=c.nombre;
+  document.getElementById('vc-tipo').textContent=c.tipo+' · '+c.telefono;
+  document.getElementById('vc-st').textContent='Llamando…';
+  S.callSecs=0;
+  go('vc');
+  // Abrir marcador del teléfono
+  const ph=(c.telefono||'').replace(/\s/g,'');
+  window.location.href='tel:'+ph;
+  setTimeout(()=>{ document.getElementById('vc-st').textContent='En llamada'; }, 3500);
+  S.callInt=setInterval(()=>{
+    S.callSecs++;
+    const rem=Math.max(0,CFG.MAX_CALL-S.callSecs);
+    document.getElementById('vc-t').textContent=fmt(S.callSecs);
+    document.getElementById('vc-rem').textContent=fmt(rem);
+    if (rem<=0) endVoice();
+  },1000);
+}
+
+function endVoice() {
+  clearInterval(S.callInt);
+  logCall('voz');
+  showSuccess('✅','¡Llamada finalizada!',`Duración: ${fmt(S.callSecs)}. La sesión se cerrará automáticamente.`);
+}
+
+// ─── VIDEOLLAMADA (Jitsi Meet) ─────────────────────────────────────────────────
+function startVideo() {
+  const c=S.selected;
+  go('vv');
+  document.getElementById('vv-sub').textContent='Videollamada con '+c.nombre;
+  const room='CabCall-'+Math.random().toString(36).slice(2,10);
+  const joinUrl=`https://${CFG.JITSI}/${room}`;
+
+  // Notificar apoderado por WhatsApp
+  const msg=`📞 *CabCall* – ${S.student.nombre} quiere iniciar una videollamada contigo.\n\nÚnete aquí: ${joinUrl}`;
+  const wa=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  if (wa) setTimeout(()=>window.open(`https://wa.me/${wa}?text=${enc(msg)}`, '_blank'), 600);
+
+  // Inicializar Jitsi
+  const box=document.getElementById('jitsi-box');
+  box.innerHTML='';
+  if (typeof JitsiMeetExternalAPI!=='undefined') {
+    S.jitsi=new JitsiMeetExternalAPI(CFG.JITSI,{
+      roomName:room,
+      parentNode:box,
+      userInfo:{displayName:S.student.nombre},
+      configOverwrite:{startWithAudioMuted:false,startWithVideoMuted:false,disableDeepLinking:true},
+      interfaceConfigOverwrite:{SHOW_JITSI_WATERMARK:false,TOOLBAR_BUTTONS:['microphone','camera','hangup']},
+    });
+    S.jitsi.addEventListener('videoConferenceLeft', endVideo);
+  } else {
+    // Fallback sin API cargada
+    box.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:#fff">
+      <div style="font-size:48px">📹</div>
+      <div style="font-size:18px;font-weight:700">Enlace enviado por WhatsApp</div>
+      <a href="${joinUrl}" target="_blank" style="color:#ffd60a;font-size:14px">${joinUrl}</a>
+    </div>`;
+  }
+}
+
+function endVideo() {
+  if (S.jitsi) { try{S.jitsi.dispose();}catch(e){} S.jitsi=null; }
+  logCall('video');
+  showSuccess('✅','¡Videollamada finalizada!','La sesión se cerrará automáticamente.');
+}
+
+// ─── MENSAJE DE VIDEO ─────────────────────────────────────────────────────────
+async function startVMsg() {
+  go('vm');
+  const c=S.selected;
+  document.getElementById('vm-name').textContent=c.nombre;
+  document.getElementById('vm-phone').textContent=c.telefono;
+  document.getElementById('btn-send').disabled=true;
+  document.getElementById('up-st').textContent='';
+  S.recBlob=null; S.recChunks=[]; S.recSecs=0; S.recording=false;
+  document.getElementById('rec-t').style.display='none';
+  document.getElementById('rec-lbl').textContent='Toca el botón rojo para grabar';
+  document.getElementById('btn-rec').textContent='🔴';
+  document.getElementById('btn-rec').classList.remove('recg');
+  try {
+    S.stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    document.getElementById('prev-vid').srcObject=S.stream;
+  } catch(e) { toast('No se pudo acceder a la cámara'); }
+}
+
+function toggleRec() { S.recording ? stopRec() : startRec(); }
+
+function startRec() {
+  if (!S.stream) return;
+  S.recChunks=[]; S.recSecs=0; S.recording=true; S.recBlob=null;
+  document.getElementById('btn-rec').classList.add('recg');
+  document.getElementById('btn-rec').textContent='⏹';
+  document.getElementById('rec-t').style.display='';
+  document.getElementById('rec-t').textContent='0:00';
+  document.getElementById('rec-lbl').textContent='Grabando… toca ⏹ para detener';
+  document.getElementById('btn-send').disabled=true;
+
+  const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'video/webm';
+  S.mediaRec=new MediaRecorder(S.stream,{mimeType:mime});
+  S.mediaRec.ondataavailable=e=>{ if(e.data.size>0) S.recChunks.push(e.data); };
+  S.mediaRec.onstop=()=>{
+    S.recBlob=new Blob(S.recChunks,{type:mime});
+    const vid=document.getElementById('prev-vid');
+    vid.srcObject=null; vid.src=URL.createObjectURL(S.recBlob); vid.muted=false;
+    document.getElementById('btn-send').disabled=false;
+    document.getElementById('rec-lbl').textContent='✅ Grabado. Toca 🔴 para volver a grabar.';
+  };
+  S.mediaRec.start(100);
+  S.recInt=setInterval(()=>{
+    S.recSecs++;
+    document.getElementById('rec-t').textContent=fmt(S.recSecs);
+    if(S.recSecs>=CFG.MAX_REC) stopRec();
+  },1000);
+}
+
+function stopRec() {
+  S.recording=false;
+  clearInterval(S.recInt);
+  if(S.mediaRec && S.mediaRec.state!=='inactive') S.mediaRec.stop();
+  document.getElementById('btn-rec').classList.remove('recg');
+  document.getElementById('btn-rec').textContent='🔴';
+}
+
+async function sendVMsg() {
+  if(!S.recBlob) return;
+  document.getElementById('btn-send').disabled=true;
+  document.getElementById('up-st').textContent='⏳ Subiendo video a la nube…';
+  try {
+    const b64=await blobToB64(S.recBlob);
+    const ext=S.recBlob.type.includes('mp4')?'mp4':'webm';
+    const body=JSON.stringify({action:'upload_video',rut:S.rut,alumno:S.student.nombre,contacto:S.selected.nombre,video:b64.split(',')[1],ext});
+    const res=await fetch(CFG.API,{method:'POST',body});
+    const d=await res.json();
+    if(d.ok){
+      const wa=(S.selected.whatsapp||S.selected.telefono||'').replace(/\D/g,'');
+      const msg=`🎥 *CabCall* – ${S.student.nombre} te dejó un mensaje de video.\n\n▶ Ver video: ${d.url}`;
+      if(wa) window.open(`https://wa.me/${wa}?text=${enc(msg)}`,'_blank');
+      stopCamera(); logCall('mensaje_video');
+      showSuccess('📨','¡Mensaje enviado!',`${S.selected.nombre} recibirá el video por WhatsApp.`);
+    } else {
+      toast('Error al subir el video. Intenta de nuevo.');
+      document.getElementById('btn-send').disabled=false;
+      document.getElementById('up-st').textContent='';
+    }
+  } catch(e) {
+    toast('Error de conexión al subir el video.');
+    document.getElementById('btn-send').disabled=false;
+    document.getElementById('up-st').textContent='';
+  }
+}
+
+function cancelVMsg() { stopCamera(); go('ct'); }
+function stopCamera() {
+  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
+  if(S.mediaRec && S.mediaRec.state!=='inactive') try{S.mediaRec.stop();}catch(e){}
+  clearInterval(S.recInt); S.recording=false;
+}
+
+// ─── ÉXITO + AUTO-LOGOUT ─────────────────────────────────────────────────────
+function showSuccess(ico,title,sub) {
+  document.getElementById('s-ico').textContent=ico;
+  document.getElementById('s-title').textContent=title;
+  document.getElementById('s-sub').textContent=sub;
+  go('s');
+  let n=5;
+  document.getElementById('s-cdown').textContent=`Cerrando sesión en ${n} segundos…`;
+  clearInterval(S.successInt);
+  S.successInt=setInterval(()=>{
+    n--;
+    if(n<=0){clearInterval(S.successInt);logout();}
+    else document.getElementById('s-cdown').textContent=`Cerrando sesión en ${n} segundos…`;
+  },1000);
+}
+
+function logout() {
+  clearInterval(S.successInt); clearInterval(S.callInt);
+  stopCamera();
+  if(S.jitsi){try{S.jitsi.dispose();}catch(e){}S.jitsi=null;}
+  Object.assign(S,{student:null,contacts:[],selected:null,rut:'',pin:'',step:'rut',callSecs:0,recSecs:0,recording:false,recBlob:null,recChunks:[]});
+  go('w');
+}
+
+// ─── LOG ──────────────────────────────────────────────────────────────────────
+async function logCall(tipo) {
+  try { await fetch(`${CFG.API}?action=log&rut=${enc(S.rut)}&alumno=${enc(S.student?.nombre||'')}&tipo=${tipo}&contacto=${enc(S.selected?.nombre||'')}`); } catch(e){}
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const enc=s=>encodeURIComponent(s);
+const fmt=s=>Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0');
+function blobToB64(b){return new Promise((r,j)=>{const f=new FileReader();f.onload=()=>r(f.result);f.onerror=j;f.readAsDataURL(b);});}
+function loading(on){document.getElementById('loading').className=on?'show':'';}
+function toast(msg,ms=3200){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',ms);}
+</script>
+</body>
+</html>
