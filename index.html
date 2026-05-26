@@ -524,10 +524,11 @@ function startVoice() {
   document.getElementById('vc-st').textContent='Llamando…';
   S.callSecs=0;
   go('vc');
-  // Abrir marcador del teléfono
-  const ph=(c.telefono||'').replace(/\s/g,'');
-  window.location.href='tel:'+ph;
-  setTimeout(()=>{ document.getElementById('vc-st').textContent='En llamada'; }, 3500);
+  // Abrir WhatsApp con mensaje de aviso al apoderado
+  const wa=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
+  const msg=`📞 *CabCall – Instituto Chacabuco*\n\n${S.student.nombre} quiere hablar contigo.\n\n✅ Llámale por WhatsApp o responde este mensaje.`;
+  if (wa) window.open(`https://wa.me/${wa}?text=${enc(msg)}`,'_blank');
+  setTimeout(()=>{ document.getElementById('vc-st').textContent='Esperando respuesta…'; }, 2000);
   S.callInt=setInterval(()=>{
     S.callSecs++;
     const rem=Math.max(0,CFG.MAX_CALL-S.callSecs);
