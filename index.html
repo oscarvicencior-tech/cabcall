@@ -524,11 +524,17 @@ function startVoice() {
   document.getElementById('vc-st').textContent='Llamando…';
   S.callSecs=0;
   go('vc');
-  // Abrir WhatsApp con mensaje de aviso al apoderado
+  // Llamada de voz vía Jitsi (audio only) + aviso WhatsApp
+  const room='CabCall-voz-'+Math.random().toString(36).slice(2,8);
+  const joinUrl=`https://${CFG.JITSI}/${room}`;
   const wa=(c.whatsapp||c.telefono||'').replace(/\D/g,'');
-  const msg=`📞 *CabCall – Instituto Chacabuco*\n\n${S.student.nombre} quiere hablar contigo.\n\n✅ Llámale por WhatsApp o responde este mensaje.`;
+  const msg=`📞 *CabCall – Instituto Chacabuco*\n\n${S.student.nombre} quiere hablar contigo.\n\n🔊 Únete a la llamada de voz:\n${joinUrl}\n\n_(Solo audio, no necesitas cámara)_`;
   if (wa) window.open(`https://wa.me/${wa}?text=${enc(msg)}`,'_blank');
-  setTimeout(()=>{ document.getElementById('vc-st').textContent='Esperando respuesta…'; }, 2000);
+  setTimeout(()=>{
+    document.getElementById('vc-st').textContent='Esperando que se una…';
+    // Abrir Jitsi audio-only en nueva pestaña
+    window.open(`${joinUrl}#config.startWithVideoMuted=true&config.startWithAudioMuted=false`,'_blank');
+  }, 1500);
   S.callInt=setInterval(()=>{
     S.callSecs++;
     const rem=Math.max(0,CFG.MAX_CALL-S.callSecs);
